@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question Answer App</title>
+    <style>
+        /* Loader styles */
+        #loader {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 8px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 8px solid #3498db;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h1>Ask a Question</h1>
+    <div id="loader"></div>
+    <form id="question-form">
+        <input type="text" id="question" placeholder="Type your question here" required>
+        <button type="submit">Ask</button>
+    </form>
+    <h2>Answer:</h2>
+    <p id="answer"></p>
+
+    <script>
+        const form = document.getElementById('question-form');
+        const loader = document.getElementById('loader');
+        const answerElement = document.getElementById('answer');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const question = document.getElementById('question').value;
+
+            // Show loader
+            loader.style.display = 'block';
+            answerElement.textContent = '';
+
+            try {
+                const response = await fetch('/api/question', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ question })
+                });
+
+                const data = await response.json();
+
+                if (data.answer) {
+                    answerElement.textContent = data.answer;
+                } else {
+                    answerElement.textContent = 'Error: ' + data.error;
+                }
+            } catch (error) {
+                answerElement.textContent = 'Error: Failed to fetch answer';
+            } finally {
+                // Hide loader
+                console.log('API call complete, hiding loader...');
+                loader.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
